@@ -12,9 +12,9 @@ Physik: Wurfbewegungen als Spiel und Labor – freier Fall, senkrechter, waagere
 
 - **Live:** https://schulapplikationen.github.io/physik-apps/wurflabor/
 - **QR-Code für die Klasse:** `qr_wurflabor.png`
-- **Aktuelle Version:** `index.html` (Stand 2026-10-27, Fassung 01)
+- **Aktuelle Version:** `index.html` (Stand 2026-10-28, Fassung 01)
 - **Versionen:** Ordner `versionen/` – jede Fassung als `JJJJ-MM-TT_NN_wurflabor.html`, die neueste ist identisch mit `index.html`.
 
-Steuerung per Tastatur (mehrere Teams an einer Tastatur), das Labor geht ohne Tastatur. Die Datei ist wegen der eingebauten Hintergrundmusik etwa 4,6 MB groß.
+Steuerung per Tastatur (mehrere Teams an einer Tastatur), das Labor geht ohne Tastatur.
 
 Erstellung unterstützt von Claude. Speichert Einstellungen nur im Browser, sendet keine Daten, lädt nichts nach.
