@@ -13,6 +13,7 @@ Interaktive Apps für den Physik- und NWT-Unterricht. Startseite: https://schula
 | `additive-synthese/` | [Additive Synthese](https://schulapplikationen.github.io/physik-apps/additive-synthese/) | 2026-09-29 |
 | `geige-hoervergleich/` | [Geige im Hörvergleich](https://schulapplikationen.github.io/physik-apps/geige-hoervergleich/) | 2026-09-29 |
 | `floetenheft/` | [Flötenheft](https://schulapplikationen.github.io/physik-apps/floetenheft/) | 2026-11-03 |
+| `tipprennen/` | [Tipprennen](https://schulapplikationen.github.io/physik-apps/tipprennen/) | 2026-11-05 |
 | `steckplatinen-ansicht/` | [Steckplatinen-Ansicht](https://schulapplikationen.github.io/physik-apps/steckplatinen-ansicht/) | 2026-09-09 |
 | `signalkette-wheatstone/` | [Signalkette Wheatstone-Brücke](https://schulapplikationen.github.io/physik-apps/signalkette-wheatstone/) | 2026-09-09 |
 

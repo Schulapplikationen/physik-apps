@@ -1,0 +1,449 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Tipprennen</title>
+<style>
+:root{--bg:#f4f6fa;--card:#fff;--ink:#1c2230;--muted:#5b6475;--line:#d6dbe5;--ok:#1f8a4c;--okbg:#d9f2e3;--err:#b3261e;--errbg:#fbdcd9;--accent:#0e7c86;--track:#e7ebf2;--cur:#fff1b8}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#141820;--card:#1e2430;--ink:#e8ecf3;--muted:#a3adbf;--line:#353d4d;--ok:#5fd18f;--okbg:#1f3a2b;--err:#ff8a80;--errbg:#4a2422;--accent:#4fc3cc;--track:#2a3140;--cur:#4a4220}}
+:root[data-theme="dark"]{--bg:#141820;--card:#1e2430;--ink:#e8ecf3;--muted:#a3adbf;--line:#353d4d;--ok:#5fd18f;--okbg:#1f3a2b;--err:#ff8a80;--errbg:#4a2422;--accent:#4fc3cc;--track:#2a3140;--cur:#4a4220}
+[hidden]{display:none!important}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif}
+header{display:flex;align-items:center;gap:12px;padding:10px 16px;background:var(--card);border-bottom:1px solid var(--line)}
+header h1{font-size:22px;margin:0;flex:1}
+main{max-width:1100px;margin:0 auto;padding:16px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px;margin-bottom:16px}
+button,select,input[type=text]{font:inherit;min-height:44px;border-radius:8px;border:1px solid var(--line);background:var(--card);color:var(--ink);padding:6px 14px}
+button{cursor:pointer}
+button:disabled{opacity:.45;cursor:default}
+.go{background:#1f8a4c;color:#fff;border-color:#1f8a4c;font-weight:600}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.modes{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px}
+.modes button{min-height:120px;text-align:left;padding:16px}
+.modes b{display:block;font-size:20px;margin-bottom:4px}
+.muted{color:var(--muted)}
+.code{font-size:64px;font-weight:800;letter-spacing:8px;color:var(--accent)}
+#text{font-size:24px;line-height:1.7;padding:14px;border:1px solid var(--line);border-radius:10px;user-select:none;-webkit-user-select:none;font-family:ui-monospace,"Cascadia Mono",Consolas,monospace}
+#text .ok{color:var(--ok)}
+#text .bad{background:var(--errbg);color:var(--err);text-decoration:underline}
+#text .cur{background:var(--cur);border-bottom:3px solid var(--accent)}
+#inp{width:100%;font:22px ui-monospace,Consolas,monospace;padding:10px;margin-top:12px;border:2px solid var(--line);border-radius:10px;background:var(--card);color:var(--ink);resize:none;height:90px}
+#inp.wrong{border-color:var(--err)}
+.src{margin-top:6px;font-size:14px}
+.track{position:relative;height:44px;background:var(--track);border-radius:22px;margin:8px 0}
+.track .fin{position:absolute;right:10px;top:6px;bottom:6px;width:6px;background:repeating-linear-gradient(var(--ink) 0 6px,transparent 6px 12px);opacity:.5}
+.racer{position:absolute;top:4px;height:36px;display:flex;align-items:center;gap:8px;transition:left .25s linear;white-space:nowrap}
+.dot{width:36px;height:36px;border-radius:50%;border:3px solid var(--card);box-shadow:0 0 0 2px var(--line);flex:none}
+.racer span{font-size:15px;font-weight:600}
+.me .dot{box-shadow:0 0 0 3px var(--accent)}
+.stats{display:flex;gap:24px;font-size:18px;margin-top:8px}
+.stats b{font-size:24px}
+.count{font-size:96px;font-weight:800;text-align:center;color:var(--accent)}
+table{border-collapse:collapse;width:100%;font-size:18px}
+td,th{padding:6px 10px;border-bottom:1px solid var(--line);text-align:left}
+.pill{display:inline-block;padding:4px 10px;border:1px solid var(--line);border-radius:20px;margin:3px}
+.msg{color:var(--err);font-weight:600}
+</style>
+</head>
+<body>
+<header><h1>Tipprennen</h1><button id="themeBtn" title="Hell/Dunkel">Hell/Dunkel</button><button id="homeBtn">Start</button></header>
+<main>
+
+<!-- Startseite -->
+<section id="vHome">
+  <div class="card"><p style="margin:0">Tippe den Text so schnell und genau wie möglich ab. Wer zuerst fertig ist, gewinnt. Ein falscher Buchstabe wird rot &ndash; lösche ihn mit der Rücktaste und tippe weiter.</p></div>
+  <div class="modes">
+    <button id="mSolo"><b>Üben</b><span class="muted">Allein gegen drei Computer-Tiere. Funktioniert ohne Internet.</span></button>
+    <button id="mJoin"><b>Rennen beitreten</b><span class="muted">Mit dem Raum-Code von der Tafel gegen deine Klasse antreten.</span></button>
+    <button id="mHost"><b>Rennen leiten</b><span class="muted">Für die Lehrkraft: Raum öffnen und das Rennen am Beamer zeigen.</span></button>
+  </div>
+</section>
+
+<!-- Textwahl (Solo und Leitung) -->
+<section id="vPick" class="card" hidden>
+  <div class="row">
+    <label>Thema <select id="cat"></select></label>
+    <label>Länge <select id="len"><option value="k">kurz</option><option value="m" selected>beliebig</option><option value="l">lang</option></select></label>
+    <label id="botLbl">Computer-Tempo <select id="bot"><option value="0.7">langsam</option><option value="1" selected>mittel</option><option value="1.5">schnell</option></select></label>
+    <span style="flex:1"></span>
+    <button class="go" id="pickGo">Los</button>
+  </div>
+</section>
+
+<!-- Beitreten -->
+<section id="vJoin" class="card" hidden>
+  <p>Nimm einen <b>Spitznamen</b>, nicht deinen echten Namen.</p>
+  <div class="row">
+    <label>Raum-Code <input type="text" id="jCode" inputmode="numeric" maxlength="4" size="5" autocomplete="off"></label>
+    <label>Spitzname <input type="text" id="jName" maxlength="14" size="14" autocomplete="off"></label>
+    <button id="jRand">Zufallsname</button>
+    <span style="flex:1"></span>
+    <button class="go" id="jGo">Beitreten</button>
+  </div>
+  <p id="jMsg" class="msg"></p>
+</section>
+
+<!-- Lobby / Leitung -->
+<section id="vLobby" class="card" hidden>
+  <div id="hostInfo" hidden>
+    <div class="muted">Raum-Code für die Klasse:</div>
+    <div class="code" id="hCode">----</div>
+  </div>
+  <p id="lobbyMsg" class="muted">Warte auf den Start ...</p>
+  <div id="lobbyList"></div>
+</section>
+
+<!-- Rennen -->
+<section id="vRace" hidden>
+  <div class="card" id="trackCard"><div id="tracks"></div><div class="row" id="hostCtl" hidden><span style="flex:1"></span><button id="endBtn">Rennen beenden</button></div></div>
+  <div class="card" id="typeCard">
+    <div id="countdown" class="count" hidden>3</div>
+    <div id="text"></div>
+    <div class="src muted" id="src"></div>
+    <textarea id="inp" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="Hier tippen ..."></textarea>
+    <div class="stats"><div>Tempo <b id="sZpm">0</b> Zeichen/min</div><div>Genauigkeit <b id="sAcc">100</b> %</div><div>Zeit <b id="sTime">0,0</b> s</div></div>
+  </div>
+  <div class="card" id="resCard" hidden>
+    <h2 style="margin-top:0">Ergebnis</h2>
+    <table><thead><tr><th>Platz</th><th>Name</th><th>Zeichen/min</th><th>Genauigkeit</th><th>Zeit</th></tr></thead><tbody id="resBody"></tbody></table>
+    <div class="row" style="margin-top:12px"><span style="flex:1"></span><button class="go" id="againBtn">Nächstes Rennen</button></div>
+  </div>
+</section>
+</main>
+
+<script>
+"use strict";
+// ---------- Texte ----------
+const TEXTE = {
+ "Grundgesetz":[
+  ["Die Würde des Menschen ist unantastbar. Sie zu achten und zu schützen ist Verpflichtung aller staatlichen Gewalt.","Grundgesetz, Art. 1 Abs. 1"],
+  ["Jeder hat das Recht auf die freie Entfaltung seiner Persönlichkeit, soweit er nicht die Rechte anderer verletzt und nicht gegen die verfassungsmäßige Ordnung oder das Sittengesetz verstößt.","Grundgesetz, Art. 2 Abs. 1"],
+  ["Jeder hat das Recht auf Leben und körperliche Unversehrtheit. Die Freiheit der Person ist unverletzlich. In diese Rechte darf nur auf Grund eines Gesetzes eingegriffen werden.","Grundgesetz, Art. 2 Abs. 2"],
+  ["Alle Menschen sind vor dem Gesetz gleich. Männer und Frauen sind gleichberechtigt.","Grundgesetz, Art. 3 Abs. 1 und Abs. 2 Satz 1"],
+  ["Die Freiheit des Glaubens, des Gewissens und die Freiheit des religiösen und weltanschaulichen Bekenntnisses sind unverletzlich.","Grundgesetz, Art. 4 Abs. 1"],
+  ["Jeder hat das Recht, seine Meinung in Wort, Schrift und Bild frei zu äußern und zu verbreiten und sich aus allgemein zugänglichen Quellen ungehindert zu unterrichten.","Grundgesetz, Art. 5 Abs. 1 Satz 1"],
+  ["Ehe und Familie stehen unter dem besonderen Schutze der staatlichen Ordnung.","Grundgesetz, Art. 6 Abs. 1"],
+  ["Das gesamte Schulwesen steht unter der Aufsicht des Staates.","Grundgesetz, Art. 7 Abs. 1"],
+  ["Alle Deutschen haben das Recht, sich ohne Anmeldung oder Erlaubnis friedlich und ohne Waffen zu versammeln.","Grundgesetz, Art. 8 Abs. 1"],
+  ["Das Briefgeheimnis sowie das Post- und Fernmeldegeheimnis sind unverletzlich.","Grundgesetz, Art. 10 Abs. 1"],
+  ["Die Wohnung ist unverletzlich.","Grundgesetz, Art. 13 Abs. 1"],
+  ["Die Bundesrepublik Deutschland ist ein demokratischer und sozialer Bundesstaat. Alle Staatsgewalt geht vom Volke aus.","Grundgesetz, Art. 20 Abs. 1 und Abs. 2 Satz 1"]
+ ],
+ "Tastatur":[
+  ["Mit der Umschalttaste schreibst du große Buchstaben. Halte sie gedrückt und tippe dann den Buchstaben."],
+  ["Auf den Tasten F und J fühlst du kleine Erhebungen. Dort liegen deine Zeigefinger, so findest du die Grundreihe blind."],
+  ["Die Leertaste ist die größte Taste. Deine Daumen ruhen auf ihr, während die anderen Finger auf der Grundreihe liegen."],
+  ["Mit Strg und C kopierst du etwas, mit Strg und V fügst du es wieder ein. Mit Strg und Z machst du den letzten Schritt rückgängig."],
+  ["Die Rücktaste löscht das Zeichen links vom Strich. Die Taste Entf löscht das Zeichen rechts davon."],
+  ["Das @ bekommst du mit der Taste Alt Gr und dem Q. So schreibst du eine E-Mail-Adresse."]
+ ],
+ "Ordner und Dateien":[
+  ["Ordne deine Dateien in Ordnern. Ein Ordner für jedes Fach hilft dir, alles schnell wiederzufinden."],
+  ["Gib Dateien sprechende Namen, zum Beispiel Mathe_Brueche_Uebung1. Dann weißt du später sofort, was drin ist."],
+  ["Die Endung hinter dem Punkt verrät, was für eine Datei es ist: docx ist ein Textdokument, jpg ist ein Bild."],
+  ["Ein Ordner kann weitere Ordner enthalten. So entsteht eine Ordnerstruktur wie ein Baum mit Ästen und Zweigen."],
+  ["Sichere wichtige Dateien an einem zweiten Ort, zum Beispiel auf einem USB-Stick. Das nennt man Backup."],
+  ["Speichere oft zwischendurch. Mit Strg und S geht das ganz schnell."]
+ ],
+ "Sicher im Internet":[
+  ["Ein sicheres Passwort ist lang und enthält Buchstaben, Zahlen und Sonderzeichen. Dein Name oder dein Geburtstag sind keine guten Passwörter."],
+  ["Verrate dein Passwort niemandem, auch nicht deiner besten Freundin oder deinem besten Freund."],
+  ["Phishing nennt man gefälschte Nachrichten, die an deine Passwörter wollen. Klicke nicht auf Links in seltsamen Nachrichten."],
+  ["Wenn eine Nachricht dich drängt, sofort etwas zu tun, sei misstrauisch. Frag lieber einen Erwachsenen, bevor du klickst."],
+  ["Melde dich nach der Arbeit an einem fremden Computer immer ab. Sonst kann der Nächste dein Konto benutzen."],
+  ["Ein guter Trick für Passwörter: Denk dir einen Satz aus und nimm die Anfangsbuchstaben, dazu Zahlen und Zeichen."]
+ ],
+ "Künstliche Intelligenz":[
+  ["Eine KI kann Texte schreiben und Fragen beantworten. Aber sie kann sich irren, deshalb prüfst du wichtige Antworten nach."],
+  ["Gib einer KI keine persönlichen Daten wie deine Adresse, deine Telefonnummer oder Fotos von dir."],
+  ["Bilder und Videos können mit KI gefälscht werden. Frag dich immer: Wer hat das gemacht und warum?"],
+  ["Wenn du eine KI für Hausaufgaben nutzt, sag es offen. Lernen musst du trotzdem selbst, die KI denkt nicht für dich."]
+ ],
+ "Datenschutz":[
+  ["Persönliche Daten sind zum Beispiel dein Name, deine Adresse und dein Geburtstag. Gib sie im Internet nur sparsam heraus."],
+  ["Bevor du ein Foto von anderen veröffentlichst, musst du sie fragen. Jeder hat das Recht am eigenen Bild."],
+  ["Was einmal im Internet steht, ist schwer wieder zu löschen. Überlege also vorher, was du teilst."],
+  ["Viele Apps sammeln Daten über dich. Schau nach, welche Rechte eine App will, bevor du sie installierst."]
+ ]
+};
+const FARBEN=["#e8833a","#3a7be8","#c2378a","#2fa36b","#8a5cd6","#d4a017","#17a2b8","#e05a5a","#6b8e23","#a0522d","#5f6fd6","#d66fb0"];
+const TIERE=["Fuchs","Igel","Otter","Luchs","Dachs","Falke","Biber","Panda","Koala","Pinguin","Delfin","Eule","Gecko","Lama","Wal","Hase"];
+
+// ---------- Hilfen ----------
+const $=id=>document.getElementById(id);
+const views=["vHome","vPick","vJoin","vLobby","vRace"];
+function show(...ids){views.forEach(v=>$(v).hidden=!ids.includes(v));}
+function esc(s){return s.replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));}
+function fmt(x,d=1){return x.toFixed(d).replace(".",",");}
+function zufallsname(){return TIERE[Math.floor(Math.random()*TIERE.length)]+" "+(10+Math.floor(Math.random()*90));}
+Object.keys(TEXTE).forEach(k=>$("cat").add(new Option(k,k)));
+$("cat").add(new Option("Alles gemischt","*"));
+function waehleText(cat,len){
+  let pool=[];
+  Object.entries(TEXTE).forEach(([k,arr])=>{if(cat==="*"||cat===k)arr.forEach((t,i)=>pool.push({k,i,t:t[0]}));});
+  let f=pool.filter(p=>len==="k"?p.t.length<=110:len==="l"?p.t.length>110:true);
+  if(!f.length)f=pool;
+  const p=f[Math.floor(Math.random()*f.length)];
+  return {k:p.k,i:p.i};
+}
+function textVon(ref){const e=TEXTE[ref.k][ref.i];return {t:e[0],src:e[1]||ref.k};}
+
+// Theme
+$("themeBtn").onclick=()=>{const r=document.documentElement;const dark=r.dataset.theme?r.dataset.theme==="dark":matchMedia("(prefers-color-scheme:dark)").matches;r.dataset.theme=dark?"light":"dark";};
+
+// ---------- Zustand ----------
+let modus=null;          // "solo" | "join" | "host"
+let race=null;           // aktuelles Rennen
+let peer=null, conn=null, conns={}, players={}, myId="ich";
+let tick=null;
+
+// ---------- Tippen ----------
+const inp=$("inp");
+inp.addEventListener("paste",e=>e.preventDefault());
+inp.addEventListener("drop",e=>e.preventDefault());
+inp.addEventListener("keydown",e=>{if(e.key==="Enter")e.preventDefault();});
+inp.addEventListener("input",()=>{
+  if(!race||!race.running)return;
+  const v=inp.value, t=race.text;
+  if(v.length>race.prevLen){ // neue Zeichen
+    for(let i=race.prevLen;i<v.length;i++){race.keys++; if(v[i]!==t[i])race.errs++;}
+  }
+  race.prevLen=v.length;
+  let n=0; while(n<v.length&&n<t.length&&v[n]===t[n])n++;
+  race.correct=n;
+  inp.classList.toggle("wrong",n<v.length);
+  zeichneText();
+  if(n===t.length&&v.length===t.length)fertig();
+  else sendeFortschritt();
+});
+function zeichneText(){
+  const t=race.text, v=inp.value, n=race.correct;
+  const badEnd=Math.min(t.length,v.length);
+  let h='<span class="ok">'+esc(t.slice(0,n))+'</span>';
+  if(badEnd>n)h+='<span class="bad">'+esc(t.slice(n,badEnd)).replace(/ /g,"&nbsp;")+'</span>';
+  const c=Math.max(n,badEnd);
+  if(c<t.length)h+='<span class="cur">'+esc(t[c])+'</span>'+esc(t.slice(c+1));
+  $("text").innerHTML=h;
+}
+function zeit(){return race.t0?(performance.now()-race.t0)/1000:0;}
+function zpm(){const s=race.doneTime||zeit();return s>0.5?race.correct/s*60:0;}
+function acc(){return race.keys?Math.max(0,(race.keys-race.errs)/race.keys*100):100;}
+function updStats(){
+  $("sZpm").textContent=Math.round(zpm());
+  $("sAcc").textContent=Math.round(acc());
+  $("sTime").textContent=fmt(race.doneTime||zeit());
+}
+
+// ---------- Rennstrecke ----------
+function zeichneStrecke(list){
+  // list: [{id,name,prog,color,done}]
+  const box=$("tracks");
+  let h="";
+  list.forEach(p=>{
+    const left=`calc(${(p.prog*100).toFixed(1)}% * 0.82)`;
+    h+=`<div class="track${p.id===myId?" me":""}"><div class="fin"></div><div class="racer" style="left:${left}"><div class="dot" style="background:${p.color}"></div><span>${esc(p.name)}${p.place?" &middot; Platz "+p.place:""}</span></div></div>`;
+  });
+  box.innerHTML=h;
+}
+
+// ---------- Rennen starten (gemeinsam) ----------
+function starteRennen(ref,delayMs){
+  const tx=textVon(ref);
+  race={ref,text:tx.t,src:tx.src,running:false,t0:0,correct:0,keys:0,errs:0,prevLen:0,doneTime:0};
+  show("vRace");
+  $("resCard").hidden=true;
+  $("typeCard").hidden=(modus==="host");$("hostCtl").hidden=(modus!=="host");
+  $("src").textContent=tx.src;
+  inp.value="";inp.disabled=true;inp.classList.remove("wrong");
+  zeichneText();updStats();
+  const cd=$("countdown");cd.hidden=false;
+  const tEnd=performance.now()+delayMs;
+  if(modus==="host"){$("typeCard").hidden=false;$("text").hidden=false;inp.hidden=true;$("src").hidden=false;document.querySelector(".stats").hidden=true;}
+  else{inp.hidden=false;document.querySelector(".stats").hidden=false;}
+  clearInterval(tick);
+  tick=setInterval(()=>{
+    const rest=tEnd-performance.now();
+    if(!race.running){
+      if(rest>0){cd.textContent=Math.ceil(rest/1000);return;}
+      cd.hidden=true;race.running=true;race.t0=performance.now();
+      if(modus!=="host"){inp.disabled=false;inp.focus();}
+    }
+    if(modus!=="host")updStats();
+    if(modus==="solo")soloTick();
+    if(modus==="host")hostTick();
+  },100);
+}
+
+function fertig(){
+  race.doneTime=zeit();race.running=false;inp.disabled=true;
+  updStats();sendeFortschritt(true);
+  if(modus==="solo")soloTick();
+}
+
+// ---------- Üben (offline, Computer-Tiere) ----------
+let bots=[];
+function soloStart(){
+  const f=parseFloat($("bot").value);
+  bots=[{id:"b1",name:"Schnecke",zpm:55*f,color:FARBEN[0]},{id:"b2",name:"Igel",zpm:90*f,color:FARBEN[1]},{id:"b3",name:"Hase",zpm:130*f,color:FARBEN[2]}];
+  bots.forEach(b=>{b.done=0;b.place=0;});
+  race_places=0;
+  starteRennen(waehleText($("cat").value,$("len").value),3000);
+}
+let race_places=0;
+function soloTick(){
+  const L=race.text.length,s=zeit();
+  bots.forEach(b=>{
+    if(!race.t0)return;
+    const prog=Math.min(1,(b.zpm/60*s)/L);
+    if(prog>=1&&!b.place){b.place=++race_places;b.doneTime=L/(b.zpm/60);}
+    b.prog=prog;
+  });
+  if(race.doneTime&&!race.myPlace)race.myPlace=++race_places;
+  const me={id:myId,name:"Du",prog:race.correct/L,color:"#0e7c86",place:race.myPlace};
+  zeichneStrecke([me,...bots.map(b=>({...b,prog:b.prog||0}))]);
+  if(race.doneTime&&!race.shown){
+    race.shown=true;clearInterval(tick);
+    const rows=[{name:"Du",zpm:zpm(),acc:acc(),t:race.doneTime}];
+    bots.forEach(b=>rows.push({name:b.name,zpm:b.zpm,acc:null,t:L/(b.zpm/60)}));
+    rows.sort((a,b)=>a.t-b.t);
+    zeigeErgebnis(rows);
+  }
+}
+function zeigeErgebnis(rows){
+  $("resBody").innerHTML=rows.map((r,i)=>`<tr><td>${r.t==null?"&ndash;":i+1}</td><td>${esc(r.name)}</td><td>${Math.round(r.zpm)}</td><td>${r.acc==null?"&ndash;":Math.round(r.acc)+" %"}</td><td>${r.t==null?"nicht fertig":fmt(r.t)+" s"}</td></tr>`).join("");
+  $("resCard").hidden=false;
+  $("againBtn").hidden=(modus==="join");
+}
+
+// ---------- Netzwerk (nur bei Live-Rennen) ----------
+function ladePeer(cb){
+  if(window.Peer)return cb();
+  const s=document.createElement("script");
+  s.src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js";
+  s.onload=cb;
+  s.onerror=()=>{const m="Live-Rennen nicht möglich: Die Verbindungs-Bibliothek lädt nicht (offline oder vom Schulnetz blockiert). Üben geht trotzdem.";$("lobbyMsg").textContent=m;$("jMsg").textContent=m;$("jGo").disabled=false;};
+  document.head.appendChild(s);
+}
+const PREFIX="tipprennen-kl5-";
+
+// Lehrkraft
+function hostOeffnen(){
+  modus="host";players={};conns={};
+  show("vLobby","vPick");$("botLbl").hidden=true;
+  $("hostInfo").hidden=false;$("lobbyMsg").textContent="Raum wird geöffnet ...";
+  ladePeer(()=>{
+    const code=String(1000+Math.floor(Math.random()*9000));
+    peer=new Peer(PREFIX+code);
+    peer.on("open",()=>{$("hCode").textContent=code;$("lobbyMsg").textContent="Die Klasse öffnet die Seite, wählt „Rennen beitreten“ und gibt den Code ein.";zeigeLobby();});
+    peer.on("error",e=>{if(e.type==="unavailable-id"){peer.destroy();hostOeffnen();}else $("lobbyMsg").textContent="Fehler: "+e.type;});
+    peer.on("connection",c=>{
+      c.on("data",d=>hostEmpfang(c,d));
+      c.on("close",()=>{delete conns[c.peer];delete players[c.peer];zeigeLobby();});
+    });
+  });
+}
+function hostEmpfang(c,d){
+  if(d.t==="join"){
+    let name=String(d.name||"Gast").slice(0,14),n=2;
+    const namen=Object.values(players).map(p=>p.name);
+    while(namen.includes(name))name=String(d.name).slice(0,11)+" "+(n++);
+    conns[c.peer]=c;
+    players[c.peer]={id:c.peer,name,prog:0,zpm:0,acc:100,done:0,place:0,color:FARBEN[Object.keys(players).length%FARBEN.length]};
+    c.send({t:"welcome",id:c.peer,name});
+    if(race&&race.running)c.send({t:"wait"});
+    zeigeLobby();
+  }else if(d.t==="prog"&&players[c.peer]&&race){
+    const p=players[c.peer];
+    if(p.place)return;
+    p.prog=Math.min(1,+d.prog||0);p.zpm=+d.zpm||0;p.acc=+d.acc||0;
+    if(d.done){p.done=+d.time||zeit();p.place=1+Object.values(players).filter(q=>q.place).length;}
+  }
+}
+function zeigeLobby(){
+  const l=Object.values(players);
+  $("lobbyList").innerHTML=(l.length?`<p><b>${l.length}</b> dabei:</p>`:"<p class='muted'>Noch niemand da.</p>")+l.map(p=>`<span class="pill"><span class="dot" style="display:inline-block;width:14px;height:14px;vertical-align:-2px;background:${p.color};border:0;box-shadow:none"></span> ${esc(p.name)}</span>`).join("");
+}
+function broadcast(m){Object.values(conns).forEach(c=>{try{c.send(m)}catch(e){}});}
+function hostStart(){
+  const ref=waehleText($("cat").value,$("len").value);
+  Object.values(players).forEach(p=>{p.prog=0;p.zpm=0;p.acc=100;p.done=0;p.place=0;});
+  broadcast({t:"start",ref,delay:4000});
+  starteRennen(ref,4000);
+}
+let lastBc=0;
+function hostTick(){
+  const list=Object.values(players).map(p=>({id:p.id,name:p.name,prog:p.prog,color:p.color,place:p.place}));
+  zeichneStrecke(list.length?list:[]);
+  if(performance.now()-lastBc>300){lastBc=performance.now();broadcast({t:"state",list});}
+  const alle=Object.values(players);
+  if(race.running&&alle.length&&alle.every(p=>p.place)&&!race.shown)hostEnde();
+}
+function hostEnde(){
+  race.shown=true;race.running=false;clearInterval(tick);
+  const rows=Object.values(players).map(p=>({name:p.name,zpm:p.zpm,acc:p.acc,t:p.place?p.done:null,prog:p.prog}))
+    .sort((a,b)=>(a.t==null)-(b.t==null)||(a.t-b.t)||(b.prog-a.prog));
+  broadcast({t:"result",rows});
+  zeigeErgebnis(rows);
+}
+
+// Schülerin / Schüler
+function beitreten(){
+  const code=$("jCode").value.trim(),name=$("jName").value.trim();
+  if(!/^\d{4}$/.test(code)){$("jMsg").textContent="Der Code hat 4 Ziffern.";return;}
+  if(!name){$("jMsg").textContent="Bitte einen Spitznamen eingeben.";return;}
+  $("jMsg").textContent="Verbinde ...";$("jGo").disabled=true;
+  ladePeer(()=>{
+    peer=new Peer();
+    const timer=setTimeout(()=>{if(!conn||!conn.open){$("jMsg").textContent="Keine Verbindung. Code richtig? Sonst kurz warten und erneut versuchen.";$("jGo").disabled=false;}},9000);
+    peer.on("error",e=>{$("jMsg").textContent=e.type==="peer-unavailable"?"Diesen Raum gibt es nicht. Code prüfen.":"Fehler: "+e.type;$("jGo").disabled=false;});
+    peer.on("open",()=>{
+      conn=peer.connect(PREFIX+code,{reliable:true});
+      conn.on("open",()=>{clearTimeout(timer);conn.send({t:"join",name});});
+      conn.on("data",clientEmpfang);
+      conn.on("close",()=>{alert("Die Verbindung zum Rennen wurde beendet.");location.reload();});
+    });
+  });
+}
+function clientEmpfang(d){
+  if(d.t==="welcome"){myId=d.id;show("vLobby");$("hostInfo").hidden=true;$("lobbyMsg").textContent="Du bist dabei als „"+d.name+"“. Warte auf den Start ...";$("lobbyList").innerHTML="";}
+  else if(d.t==="wait"){$("lobbyMsg").textContent="Ein Rennen läuft gerade. Du bist beim nächsten dabei.";}
+  else if(d.t==="start"){starteRennen(d.ref,d.delay);}
+  else if(d.t==="state"&&race){
+    const list=d.list.map(p=>p.id===myId?{...p,prog:race.correct/race.text.length}:p);
+    zeichneStrecke(list);
+  }
+  else if(d.t==="result"){if(race){race.running=false;inp.disabled=true;clearInterval(tick);}zeigeErgebnis(d.rows);}
+}
+let lastSend=0;
+function sendeFortschritt(done){
+  if(modus!=="join"||!conn||!conn.open)return;
+  const now=performance.now();
+  if(!done&&now-lastSend<150)return;
+  lastSend=now;
+  conn.send({t:"prog",prog:race.correct/race.text.length,zpm:zpm(),acc:acc(),done:!!done,time:race.doneTime});
+}
+
+// ---------- Knöpfe ----------
+$("mSolo").onclick=()=>{modus="solo";$("botLbl").hidden=false;show("vPick");};
+$("mJoin").onclick=()=>{modus="join";if(!$("jName").value)$("jName").value=zufallsname();show("vJoin");$("jCode").focus();};
+$("mHost").onclick=hostOeffnen;
+$("jRand").onclick=()=>$("jName").value=zufallsname();
+$("jGo").onclick=beitreten;
+$("jCode").addEventListener("keydown",e=>{if(e.key==="Enter")beitreten();});
+$("pickGo").onclick=()=>{if(modus==="solo")soloStart();else if(modus==="host")hostStart();};
+$("againBtn").onclick=()=>{
+  if(modus==="solo"){show("vPick");}
+  else if(modus==="host"){if(race&&!race.shown)hostEnde();show("vLobby","vPick");zeigeLobby();}
+};
+$("homeBtn").onclick=()=>{if(modus&&modus!=="solo"&&!confirm("Zur Startseite? Die Verbindung wird getrennt."))return;location.reload();};
+$("endBtn").onclick=()=>{if(race&&!race.shown)hostEnde();};
+// Lehrkraft kann ein laufendes Rennen beenden
+document.addEventListener("keydown",e=>{if(modus==="host"&&e.key==="Escape"&&race&&race.running&&!race.shown)hostEnde();});
+window.__app={TEXTE,get race(){return race},soloStart};
+show("vHome");
+</script>
+</body>
+</html>
