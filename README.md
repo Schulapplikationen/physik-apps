@@ -10,6 +10,7 @@ Interaktive Apps für den Physik- und NWT-Unterricht. Startseite: https://schula
 | `lehrertool-lite/` | [Lehrertool Lite](https://schulapplikationen.github.io/physik-apps/lehrertool-lite/) | 2026-11-03 |
 | `feldlabor/` | [Feldlabor](https://schulapplikationen.github.io/physik-apps/feldlabor/) | 2026-10-04 |
 | `wellenlabor/` | [Wellenlabor](https://schulapplikationen.github.io/physik-apps/wellenlabor/) | 2026-10-16 |
+| `vektorlabor/` | [Vektorlabor 3D](https://schulapplikationen.github.io/physik-apps/vektorlabor/) | 2026-11-06 |
 | `additive-synthese/` | [Additive Synthese](https://schulapplikationen.github.io/physik-apps/additive-synthese/) | 2026-09-29 |
 | `geige-hoervergleich/` | [Geige im Hörvergleich](https://schulapplikationen.github.io/physik-apps/geige-hoervergleich/) | 2026-09-29 |
 | `floetenheft/` | [Flötenheft](https://schulapplikationen.github.io/physik-apps/floetenheft/) | 2026-11-03 |
