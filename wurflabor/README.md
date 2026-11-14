@@ -9,10 +9,11 @@ Physik: Wurfbewegungen als Spiel und Labor – freier Fall, senkrechter, waagere
 - **Labor:** Winkel α, v₀, Abwurfhöhe, Luft und Ort genau einstellen, werfen und Messwerte in einer Tabelle sammeln (kopierbar); „Rechnen & prüfen“ mit Aufgaben zu Fallzeit, Steighöhe, Wurfweite u. a.
 - **Physik-Anzeige:** Einfach (α, v₀) oder Profi (Zerlegung von v₀, Wurfdaten), Bahnspur mit Zeitmarken, Zielvorschau; Voreinstellung „Physikunterricht“ = Vakuum, Bahnspur, Profi-Anzeige.
 - **Gelände bauen:** eigenes Gelände malen oder Vorlagen nutzen.
+- **Werkstatt:** eigene Früchte, Skills und Spielregeln bauen, auf dem Übungsplatz testen und gleich damit spielen; Stand bleibt im Browser, Sicherung als Speicherdatei (.json).
 
 - **Live:** https://schulapplikationen.github.io/physik-apps/wurflabor/
 - **QR-Code für die Klasse:** `qr_wurflabor.png`
-- **Aktuelle Version:** `index.html` (Stand 2026-10-28, Fassung 01)
+- **Aktuelle Version:** `index.html` (Stand 2026-11-14, Fassung 01)
 - **Versionen:** Ordner `versionen/` – jede Fassung als `JJJJ-MM-TT_NN_wurflabor.html`, die neueste ist identisch mit `index.html`.
 
 Steuerung per Tastatur (mehrere Teams an einer Tastatur), das Labor geht ohne Tastatur.
