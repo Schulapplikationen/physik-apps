@@ -6,7 +6,7 @@ Interaktive Apps für den Physik- und NWT-Unterricht. Startseite: https://schula
 |---|---|---|
 | `bewegungslabor/` | [Bewegungslabor](https://schulapplikationen.github.io/physik-apps/bewegungslabor/) | 2026-10-02 |
 | `wurflabor/` | [Wurflabor](https://schulapplikationen.github.io/physik-apps/wurflabor/) | 2026-11-14 |
-| `raumfluglabor/` | [Raumfluglabor](https://schulapplikationen.github.io/physik-apps/raumfluglabor/) | 2026-10-18 |
+| `raumfluglabor/` | [Raumfluglabor](https://schulapplikationen.github.io/physik-apps/raumfluglabor/) | 2026-10-25 |
 | `lehrertool-lite/` | [Lehrertool Lite](https://schulapplikationen.github.io/physik-apps/lehrertool-lite/) | 2026-11-03 |
 | `feldlabor/` | [Feldlabor](https://schulapplikationen.github.io/physik-apps/feldlabor/) | 2026-10-04 |
 | `wellenlabor/` | [Wellenlabor](https://schulapplikationen.github.io/physik-apps/wellenlabor/) | 2026-10-16 |
